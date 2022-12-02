@@ -1,0 +1,70 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.35.0.
+--
+-- see: https://github.com/sol/hpack
+
+name:           advent-of-code-y2022
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/ehofreiter/advent-of-code-y2022#readme>
+homepage:       https://github.com/ehofreiter/advent-of-code-y2022#readme
+bug-reports:    https://github.com/ehofreiter/advent-of-code-y2022/issues
+author:         Eric W. Hofreiter
+maintainer:     Eric W. Hofreiter
+copyright:      2022 Eric W. Hofreiter
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+
+source-repository head
+  type: git
+  location: https://github.com/ehofreiter/advent-of-code-y2022
+
+library
+  exposed-modules:
+      AdventOfCodeY2022.Common
+      AdventOfCodeY2022.CoordMap
+      AdventOfCodeY2022.CoordVec
+      AdventOfCodeY2022.Day1
+  other-modules:
+      Paths_advent_of_code_y2022
+  hs-source-dirs:
+      src
+  ghc-options: -Werror=incomplete-patterns -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-home-modules -Wpartial-fields
+  build-depends:
+      aeson
+    , base >=4.7 && <5
+    , bytestring
+    , containers
+    , indexed-traversable
+    , lens
+    , linear
+    , parsec
+    , split
+    , time
+    , vector
+  default-language: Haskell2010
+
+executable advent-of-code-y2022-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_advent_of_code_y2022
+  hs-source-dirs:
+      app
+  ghc-options: -Werror=incomplete-patterns -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-home-modules -Wpartial-fields -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      advent-of-code-y2022
+    , aeson
+    , base >=4.7 && <5
+    , bytestring
+    , containers
+    , indexed-traversable
+    , lens
+    , linear
+    , parsec
+    , split
+    , time
+    , vector
+  default-language: Haskell2010

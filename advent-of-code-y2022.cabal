@@ -28,6 +28,7 @@ library
       AdventOfCodeY2022.CoordMap
       AdventOfCodeY2022.CoordVec
       AdventOfCodeY2022.Day1
+      AdventOfCodeY2022.Day2
   other-modules:
       Paths_advent_of_code_y2022
   hs-source-dirs:

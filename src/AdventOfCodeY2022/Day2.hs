@@ -37,7 +37,9 @@ runWith filePath = do
 
 load :: FilePath -> IO [(RPS, RPS)]
 load filePath = do
-  strs <- readInputs filePath (\str -> let [a, b] = splitOn " " str in (readRps1 a, readRps2 b))
+  strs <- readInputs filePath $ \str -> case splitOn " " str of
+    [a, b] -> (readRps1 a, readRps2 b)
+    _ -> error "not two"
   pure strs
 data RPS = Ro | Pa | Sc deriving (Eq, Ord, Show)
 

@@ -30,6 +30,7 @@ library
       AdventOfCodeY2022.Day1
       AdventOfCodeY2022.Day2
       AdventOfCodeY2022.Day3
+      AdventOfCodeY2022.Day4
       AdventOfCodeY2022.NewDay
   other-modules:
       Paths_advent_of_code_y2022

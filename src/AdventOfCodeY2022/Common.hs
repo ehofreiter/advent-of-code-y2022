@@ -18,6 +18,12 @@ readInputs filePath f = do
 readIntList :: String -> [Int]
 readIntList = map read . splitOn ","
 
+printSample :: Show a => [a] -> IO ()
+printSample xs = do
+  putStrLn $ "length: " <> show (length xs)
+  putStrLn "first 5:"
+  mapM_ (putStrLn . ("  " <>) . show) $ take 5 xs
+
 -- | Creates a histogram from a list of values, mapping the number of
 -- occurrences of each value in the given list.
 -- >>> mkHistogram "NNNCNCCHHNNNNH"

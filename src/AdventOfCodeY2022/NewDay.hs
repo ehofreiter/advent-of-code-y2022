@@ -2,6 +2,7 @@
 module AdventOfCodeY2022.NewDay where
 
 import           Control.Applicative
+import           Control.Lens
 import           Control.Monad
 import           Data.Char
 import           Data.Foldable
@@ -30,19 +31,12 @@ runF = dataDir <> "input.txt"
 testF = dataDir <> "test.txt"
 
 run, test :: IO ()
-run = runWith runF
-test = runWith testF
+run = load runF >>= exec
+test = load testF >>= exec
 
-runWith :: FilePath -> IO ()
-runWith filePath = do
-  lines <- loadLines filePath
-  print $ take 10 lines
-  print $ length lines
-  let inputs = parseInputs lines
-  print $ length inputs
+load :: FilePath -> IO [String]
+load filePath = readInputs filePath id
 
-loadLines :: FilePath -> IO [String]
-loadLines filePath = readInputs filePath id
-
-parseInputs :: [String] -> [String]
-parseInputs = id
+exec :: [String] -> IO ()
+exec lines = do
+  printSample lines

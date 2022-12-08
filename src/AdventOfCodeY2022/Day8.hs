@@ -52,7 +52,7 @@ exec lines = do
   print $ Set.size $ rowIxs <> colIxs <> rowIxsRev <> colIxsRev
   let treeCV = readTreeCV lines
   let scores = imap (\c t -> viewScore treeCV c) treeCV
-  print $ maximum $ CV.toList scores
+  print $ maximum scores
 
 viewScore :: CV.CoordVec Tree -> CV.Coord -> Int
 viewScore cvt c = upScore * leftScore * rightScore * downScore

@@ -25,9 +25,12 @@ module AdventOfCodeY2022.CoordVec
   , adjPairs8
   ) where
 
+import           Data.Bifunctor
 import           Data.List.Split
+import           Data.Foldable.WithIndex
 import           Data.Functor.WithIndex
 import           Data.Maybe
+import           Data.Traversable.WithIndex
 import qualified Data.Vector as Vec
 import           Linear.V2
 
@@ -51,8 +54,25 @@ instance Foldable CoordVec where
   foldMap f = foldMap f . coordVec
   foldr f z = foldr f z . coordVec
 
+instance FoldableWithIndex (V2 Int) CoordVec where
+  ifoldr f z cv = Vec.ifoldr f' z $ coordVec cv
+    where
+      f' i = f (unflattenCoord cv i)
+  ifoldr' f z cv = Vec.ifoldr' f' z $ coordVec cv
+    where
+      f' i = f (unflattenCoord cv i)
+  ifoldl f z cv = Vec.ifoldl f' z $ coordVec cv
+    where
+      f' x i = f (unflattenCoord cv i) x
+  ifoldl' f z cv = Vec.ifoldl' f' z $ coordVec cv
+    where
+      f' x i = f (unflattenCoord cv i) x
+
 instance Traversable CoordVec where
   traverse f cv = fmap (\v -> cv { coordVec = v }) . traverse f $ coordVec cv
+
+instance TraversableWithIndex Coord CoordVec where
+  itraverse f = traverse (uncurry f) . indexed
 
 flattenCoord :: CoordVec a -> Coord -> Int
 flattenCoord cv (V2 x y) = x + y * colCount cv
@@ -62,6 +82,9 @@ unflattenCoord cv i = V2 x y
   where
     y = i `div` colCount cv
     x = i `mod` colCount cv
+
+indexed :: CoordVec a -> CoordVec (Coord, a)
+indexed cv = first (unflattenCoord cv) <$> overVec Vec.indexed cv
 
 -- | Apply a map over the inner Vector. Promise not to change the size!
 overVec :: (Vec.Vector a -> Vec.Vector b) -> CoordVec a -> CoordVec b
@@ -161,10 +184,10 @@ adjRows :: CoordVec a -> Int -> [Int]
 adjRows cv y = catMaybes [aboveRow cv y, belowRow cv y]
 
 adjColCoords :: CoordVec a -> Coord -> [Coord]
-adjColCoords cv (V2 x y) = fmap (flip V2 y) $ adjCols cv x
+adjColCoords cv (V2 x y) = flip V2 y <$> adjCols cv x
 
 adjRowCoords :: CoordVec a -> Coord -> [Coord]
-adjRowCoords cv (V2 x y) = fmap (V2 x) $ adjRows cv y
+adjRowCoords cv (V2 x y) = V2 x <$> adjRows cv y
 
 adjDiagCoords :: CoordVec a -> Coord -> [Coord]
 adjDiagCoords cv (V2 x y) = V2 <$> adjCols cv x <*> adjRows cv y
@@ -176,10 +199,10 @@ adjCoords8 :: CoordVec a -> Coord -> [Coord]
 adjCoords8 cv c = adjCoords4 cv c <> adjDiagCoords cv c
 
 adjs4 :: CoordVec a -> Coord -> [a]
-adjs4 cv c = fmap (cv !) $ adjCoords4 cv c
+adjs4 cv c = (cv !) <$> adjCoords4 cv c
 
 adjs8 :: CoordVec a -> Coord -> [a]
-adjs8 cv c = fmap (cv !) $ adjCoords8 cv c
+adjs8 cv c = (cv !) <$> adjCoords8 cv c
 
 -- >>> adjPairs4 (fromLists ["ab","cd"]) (V2 0 0)
 -- [(V2 1 0,'b'),(V2 0 1,'c')]
@@ -194,7 +217,7 @@ adjs8 cv c = fmap (cv !) $ adjCoords8 cv c
 -- CallStack (from HasCallStack):
 --   error, called at /tmp/danteYtE0Hg.hs:119:5 in main:AOC2019.CoordVec
 adjPairs4 :: CoordVec a -> Coord -> [(Coord, a)]
-adjPairs4 cv c = fmap f $ adjCoords4 cv c
+adjPairs4 cv c = f <$> adjCoords4 cv c
   where
     f c' = (c', cv ! c')
 
@@ -203,6 +226,6 @@ adjPairs4 cv c = fmap f $ adjCoords4 cv c
 -- >>> adjPairs8 (fromLists ["abc","def","ghi"]) (V2 1 1)
 -- [(V2 0 1,'d'),(V2 2 1,'f'),(V2 1 0,'b'),(V2 1 2,'h'),(V2 0 0,'a'),(V2 0 2,'g'),(V2 2 0,'c'),(V2 2 2,'i')]
 adjPairs8 :: CoordVec a -> Coord -> [(Coord, a)]
-adjPairs8 cv c = fmap f $ adjCoords8 cv c
+adjPairs8 cv c = f <$> adjCoords8 cv c
   where
     f c' = (c', cv ! c')

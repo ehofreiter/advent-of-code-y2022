@@ -25,7 +25,6 @@ source-repository head
 library
   exposed-modules:
       AdventOfCodeY2022.Common
-      AdventOfCodeY2022.CoordMap
       AdventOfCodeY2022.CoordVec
       AdventOfCodeY2022.Day1
       AdventOfCodeY2022.Day2
@@ -34,6 +33,7 @@ library
       AdventOfCodeY2022.Day5
       AdventOfCodeY2022.Day6
       AdventOfCodeY2022.Day7
+      AdventOfCodeY2022.Day8
       AdventOfCodeY2022.NewDay
   other-modules:
       Paths_advent_of_code_y2022

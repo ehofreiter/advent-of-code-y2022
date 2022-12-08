@@ -1,5 +1,5 @@
 {-# LANGUAGE TupleSections #-}
-module AdventOfCodeY2022.NewDay where
+module AdventOfCodeY2022.Day7 where
 
 import           Control.Applicative
 import           Control.Lens

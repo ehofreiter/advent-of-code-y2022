@@ -1,10 +1,12 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE TupleSections #-}
 
 module AdventOfCodeY2022.CoordVec
   ( CoordVec
   , Coord
+  , flattenCoord
+  , unflattenCoord
+  , empty
   , fromLists
   , toLists
   , toList
@@ -12,6 +14,7 @@ module AdventOfCodeY2022.CoordVec
   , colSize
   , rowCount
   , colCount
+  , allCoords
   , (!)
   , (!?)
   , adjs4
@@ -26,8 +29,9 @@ import           Data.List.Split
 import           Data.Functor.WithIndex
 import           Data.Maybe
 import qualified Data.Vector as Vec
+import           Linear.V2
 
-type Coord = (Int, Int)
+type Coord = V2 Int
 data CoordVec a = CoordVec
   { rowSize :: Int
   , colSize :: Int
@@ -38,16 +42,23 @@ data CoordVec a = CoordVec
 instance Functor CoordVec where
   fmap f = overVec (fmap f)
 
-instance FunctorWithIndex (Int, Int) CoordVec where
+instance FunctorWithIndex (V2 Int) CoordVec where
   imap f cv = overVec (Vec.imap f') cv
     where
       f' i = f (unflattenCoord cv i)
 
+instance Foldable CoordVec where
+  foldMap f = foldMap f . coordVec
+  foldr f z = foldr f z . coordVec
+
+instance Traversable CoordVec where
+  traverse f cv = fmap (\v -> cv { coordVec = v }) . traverse f $ coordVec cv
+
 flattenCoord :: CoordVec a -> Coord -> Int
-flattenCoord cv (x, y) = x + y * colCount cv
+flattenCoord cv (V2 x y) = x + y * colCount cv
 
 unflattenCoord :: CoordVec a -> Int -> Coord
-unflattenCoord cv i = (x, y)
+unflattenCoord cv i = V2 x y
   where
     y = i `div` colCount cv
     x = i `mod` colCount cv
@@ -101,19 +112,27 @@ rowCount = colSize
 colCount :: CoordVec a -> Int
 colCount = rowSize
 
-(!) :: CoordVec a -> (Int, Int) -> a
-(!) cv (x, y) | x < 0 =
-  error $ "Negative col " ++ show x
-(!) cv (x, y) | x >= rowSize cv =
-  error $ "Col " ++ show x ++ " not less than colCount " ++ show (colCount cv)
-(!) cv (x, y) | y < 0 =
-  error $ "Negative row " ++ show y
-(!) cv (x, y) | y >= colSize cv =
-  error $ "Row " ++ show y ++ " not less than rowCount " ++ show (rowCount cv)
-(!) cv (x, y) = coordVec cv Vec.! (x + y * rowSize cv)
+-- |
+-- >>> allCoords $ fromLists ["123","456"]
+-- [V2 0 0,V2 0 1,V2 1 0,V2 1 1,V2 2 0,V2 2 1]
+allCoords :: CoordVec a -> [Coord]
+allCoords cv = V2 <$> [0..rowSize cv - 1] <*> [0..colSize cv - 1]
 
-(!?) :: CoordVec a -> (Int, Int) -> Maybe a
-(!?) cv (x, y) | x < 0
+(!) :: CoordVec a -> Coord -> a
+(!) cv (V2 x y)
+  | x < 0 =
+    error $ "Negative col " ++ show x
+  | x >= rowSize cv =
+    error $ "Col " ++ show x ++ " not less than colCount " ++ show (colCount cv)
+  | y < 0 =
+    error $ "Negative row " ++ show y
+  | y >= colSize cv =
+    error $ "Row " ++ show y ++ " not less than rowCount " ++ show (rowCount cv)
+  | otherwise =
+    coordVec cv Vec.! (x + y * rowSize cv)
+
+(!?) :: CoordVec a -> Coord -> Maybe a
+(!?) cv (V2 x y) | x < 0
               || x >= rowSize cv
               || y < 0
               || y >= colSize cv = Nothing
@@ -142,13 +161,13 @@ adjRows :: CoordVec a -> Int -> [Int]
 adjRows cv y = catMaybes [aboveRow cv y, belowRow cv y]
 
 adjColCoords :: CoordVec a -> Coord -> [Coord]
-adjColCoords cv (x, y) = fmap (, y) $ adjCols cv x
+adjColCoords cv (V2 x y) = fmap (flip V2 y) $ adjCols cv x
 
 adjRowCoords :: CoordVec a -> Coord -> [Coord]
-adjRowCoords cv (x, y) = fmap (x ,) $ adjRows cv y
+adjRowCoords cv (V2 x y) = fmap (V2 x) $ adjRows cv y
 
 adjDiagCoords :: CoordVec a -> Coord -> [Coord]
-adjDiagCoords cv (x, y) = (,) <$> adjCols cv x <*> adjRows cv y
+adjDiagCoords cv (V2 x y) = V2 <$> adjCols cv x <*> adjRows cv y
 
 adjCoords4 :: CoordVec a -> Coord -> [Coord]
 adjCoords4 cv c = adjColCoords cv c <> adjRowCoords cv c
@@ -162,23 +181,27 @@ adjs4 cv c = fmap (cv !) $ adjCoords4 cv c
 adjs8 :: CoordVec a -> Coord -> [a]
 adjs8 cv c = fmap (cv !) $ adjCoords8 cv c
 
--- >>> adjPairs4 (fromLists ["ab","cd"]) (0,0)
--- [((1,0),'b'),((0,1),'c')]
--- >>> adjPairs4 (fromLists ["abc","def","ghi"]) (1,1)
--- [((0,1),'d'),((2,1),'f'),((1,0),'b'),((1,2),'h')]
--- >>> adjPairs4 (fromLists ["abc","def","ghi"]) (3,1)
--- [((2,1),'f'),((3,0),*** Exception: Col 3 not less than colCount 3
--- >>> adjPairs4 (fromLists ["abc","def","ghi"]) (1,3)
--- [((0,3),*** Exception: Row 3 not less than rowCount 3
+-- >>> adjPairs4 (fromLists ["ab","cd"]) (V2 0 0)
+-- [(V2 1 0,'b'),(V2 0 1,'c')]
+-- >>> adjPairs4 (fromLists ["abc","def","ghi"]) (V2 1 1)
+-- [(V2 0 1,'d'),(V2 2 1,'f'),(V2 1 0,'b'),(V2 1 2,'h')]
+-- >>> adjPairs4 (fromLists ["abc","def","ghi"]) (V2 3 1)
+-- [(V2 2 1,'f'),(V2 3 0,*** Exception: Col 3 not less than colCount 3
+-- CallStack (from HasCallStack):
+--   error, called at /tmp/danteYtE0Hg.hs:115:5 in main:AOC2019.CoordVec
+-- >>> adjPairs4 (fromLists ["abc","def","ghi"]) (V2 1 3)
+-- [(V2 0 3,*** Exception: Row 3 not less than rowCount 3
+-- CallStack (from HasCallStack):
+--   error, called at /tmp/danteYtE0Hg.hs:119:5 in main:AOC2019.CoordVec
 adjPairs4 :: CoordVec a -> Coord -> [(Coord, a)]
 adjPairs4 cv c = fmap f $ adjCoords4 cv c
   where
     f c' = (c', cv ! c')
 
--- >>> adjPairs8 (fromLists ["ab","cd"]) (0,0)
--- [((1,0),'b'),((0,1),'c'),((1,1),'d')]
--- >>> adjPairs8 (fromLists ["abc","def","ghi"]) (1,1)
--- [((0,1),'d'),((2,1),'f'),((1,0),'b'),((1,2),'h'),((0,0),'a'),((0,2),'g'),((2,0),'c'),((2,2),'i')]
+-- >>> adjPairs8 (fromLists ["ab","cd"]) (V2 0 0)
+-- [(V2 1 0,'b'),(V2 0 1,'c'),(V2 1 1,'d')]
+-- >>> adjPairs8 (fromLists ["abc","def","ghi"]) (V2 1 1)
+-- [(V2 0 1,'d'),(V2 2 1,'f'),(V2 1 0,'b'),(V2 1 2,'h'),(V2 0 0,'a'),(V2 0 2,'g'),(V2 2 0,'c'),(V2 2 2,'i')]
 adjPairs8 :: CoordVec a -> Coord -> [(Coord, a)]
 adjPairs8 cv c = fmap f $ adjCoords8 cv c
   where

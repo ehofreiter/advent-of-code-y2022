@@ -4,6 +4,7 @@ module AdventOfCodeY2022.NewDay where
 import           Control.Applicative
 import           Control.Lens
 import           Control.Monad
+import           Data.Bifunctor
 import           Data.Char
 import           Data.Foldable
 import qualified Data.List as List

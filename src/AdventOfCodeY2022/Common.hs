@@ -1,8 +1,10 @@
 {-# LANGUAGE TupleSections #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 -- | Common functions for adventofcode.com/2022. Initially copied from previous year.
 module AdventOfCodeY2022.Common where
 
+import           Data.Bifunctor
 import           Data.Foldable
 import           Data.List.Split
 import qualified Data.Map.Strict as Map
@@ -64,3 +66,38 @@ bfs getAdjs initialQueue = loop initialSeen initialQueue Seq.empty
               queue' = ns >< Seq.fromList newNodes
               seen' = seen `Set.union` Set.fromList newNodes
           in  loop seen' queue' (result :|> n)
+
+minCostSearch
+  :: (Ord n, Ord cost, Num cost)
+  => (n -> [(cost, n)]) -- get node neighbors and edge cost, cost always positive and additive
+  -> n -- starting node
+  -> [(cost, n)] -- resulting lazy stream of ending nodes and minimal cost
+minCostSearch getNbors node0 = loop Set.empty (Set.singleton (0, node0))
+  where
+    loop solved unsolved = case Set.minView unsolved of
+      Nothing -> []
+      Just ((cost, node), unsolved') ->
+        if Set.member node solved
+        then loop solved' unsolved'
+        else (cost, node) : loop solved' (unsolved' <> newUnsolved)
+        where
+          solved' = Set.insert node solved
+          newUnsolved = Set.fromList $ first (+ cost) <$> getNbors node
+
+type Node = Char
+type Cost = Int
+
+-- 'a' <-100--> 'b'
+--  ^            ^
+--  |            |
+--  2            1
+--  |            |
+--  v            v
+-- 'c' <--10--> 'd'
+someGraph :: Node -> [(Cost, Node)]
+someGraph n = case n of
+  'a' -> [(100, 'b'), (2, 'c')]
+  'b' -> [(100, 'a'), (1, 'd')]
+  'c' -> [(2, 'a'), (10, 'd')]
+  'd' -> [(10, 'c'), (1, 'b')]
+  _ -> []

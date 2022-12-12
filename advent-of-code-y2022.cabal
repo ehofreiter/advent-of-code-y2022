@@ -28,6 +28,7 @@ library
       AdventOfCodeY2022.CoordVec
       AdventOfCodeY2022.Day1
       AdventOfCodeY2022.Day10
+      AdventOfCodeY2022.Day11
       AdventOfCodeY2022.Day2
       AdventOfCodeY2022.Day3
       AdventOfCodeY2022.Day4
@@ -62,7 +63,7 @@ executable advent-of-code-y2022-exe
       Paths_advent_of_code_y2022
   hs-source-dirs:
       app
-  ghc-options: -Werror=incomplete-patterns -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-home-modules -Wpartial-fields -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -Werror=incomplete-patterns -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-home-modules -Wpartial-fields -threaded -rtsopts -with-rtsopts=-N -O2
   build-depends:
       advent-of-code-y2022
     , aeson

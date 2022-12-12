@@ -2,11 +2,12 @@ module Main where
 
 import System.Environment
 
-import AdventOfCodeY2022.Day1
+import AdventOfCodeY2022.Day11
 
 main :: IO ()
 main = do
   args <- getArgs
-  case take 1 args of
-    [] -> putStrLn "Error: first command line argument should be test input file path."
-    filePath:_ -> runWith filePath
+  case args of
+    "run":_ -> run
+    "test":_ -> test
+    _ -> putStrLn "Defaulting to run." >> run

@@ -101,3 +101,8 @@ someGraph n = case n of
   'c' -> [(2, 'a'), (10, 'd')]
   'd' -> [(10, 'c'), (1, 'b')]
   _ -> []
+
+-- >>> take 10 $ iterateM (\x -> if x > 5 then Nothing else Just (x+1)) (Just 0)
+-- [Just 0,Just 1,Just 2,Just 3,Just 4,Just 5,Just 6,Nothing,Nothing,Nothing]
+iterateM :: Monad m => (a -> m a) -> m a -> [m a]
+iterateM f mx = mx : iterateM f (f =<< mx)

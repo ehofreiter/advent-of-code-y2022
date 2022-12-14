@@ -2,7 +2,7 @@ module Main where
 
 import System.Environment
 
-import AdventOfCodeY2022.Day11
+import AdventOfCodeY2022.Day14
 
 main :: IO ()
 main = do

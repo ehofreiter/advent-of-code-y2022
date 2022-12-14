@@ -63,6 +63,10 @@ exec lines = do
   let (Just i2) = List.elemIndex div2 sortedVals
   let (Just i6) = List.elemIndex div6 sortedVals
   print $ (i2 + 1) * (i6 + 1)
+  printSample $ lines
+    & filter (not . null)
+    & traverse (P.parse packet "packet")
+    & either (error . show) id
 
 div2 :: Val
 div2 = VL [VL [VI 2]]
@@ -112,3 +116,15 @@ data Val
   = VL [Val]
   | VI Int
   deriving (Eq, Ord, Show)
+
+packet :: P.Parsec String u Val
+packet =
+  valueList <|> valueInt
+
+valueList :: P.Parsec String u Val
+valueList =
+  VL <$> P.between (P.char '[') (P.char ']') (P.sepBy packet (P.char ','))
+
+valueInt :: P.Parsec String u Val
+valueInt =
+  VI . read <$> P.many1 P.digit

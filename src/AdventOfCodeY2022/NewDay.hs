@@ -6,6 +6,7 @@ import           Control.Lens
 import           Control.Monad
 import           Data.Bifunctor
 import           Data.Char
+import           Data.Either
 import           Data.Foldable
 import           Data.Foldable.WithIndex
 import           Data.Functor

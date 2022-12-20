@@ -10,6 +10,11 @@ fi
 
 file="src/AdventOfCodeY2022/Day$day.hs"
 
+if [[ $2 == 2 ]]
+then
+  file="src/AdventOfCodeY2022/Day${day}Part2.hs"
+fi
+
 if [[ ! -f $file ]]
 then
   echo "file '$file' does not exist"
